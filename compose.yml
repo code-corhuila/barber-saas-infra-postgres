@@ -1,0 +1,66 @@
+# Root composition of BarberSaaS and the single PostgreSQL instance of the platform
+# (ADR-011, course norm Annex J J.2 and J.7). Every -db repository migrates its own schema
+# into this instance; every -api connects with its own <domain>_app user, never as the
+# administrator. The project name comes from env/<environment>.env (COMPOSE_PROJECT_NAME),
+# so dev, qa and main get their own container and volume.
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_DB: ${PG_DATABASE:?set PG_DATABASE}
+      POSTGRES_USER: ${PG_ADMIN_USER:?set PG_ADMIN_USER}
+      POSTGRES_PASSWORD: ${PG_ADMIN_PASSWORD:?set PG_ADMIN_PASSWORD}
+      IDENTITY_AUTH_APP_PASSWORD: ${IDENTITY_AUTH_APP_PASSWORD:-}
+      BARBERSHOP_APP_PASSWORD: ${BARBERSHOP_APP_PASSWORD:-}
+      SCHEDULE_APP_PASSWORD: ${SCHEDULE_APP_PASSWORD:-}
+      APPOINTMENT_APP_PASSWORD: ${APPOINTMENT_APP_PASSWORD:-}
+      LOYALTY_APP_PASSWORD: ${LOYALTY_APP_PASSWORD:-}
+      FINANCE_INVENTORY_APP_PASSWORD: ${FINANCE_INVENTORY_APP_PASSWORD:-}
+      PLATFORM_ADMIN_APP_PASSWORD: ${PLATFORM_ADMIN_APP_PASSWORD:-}
+      WORKFLOW_APP_PASSWORD: ${WORKFLOW_APP_PASSWORD:-}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    networks: [platform]
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.108.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./observability/otel-collector.yaml:/etc/otel/config.yaml:ro
+    profiles: [observability]
+    networks: [platform]
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    profiles: [observability]
+    networks: [platform]
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - ./observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/ds.yaml:ro
+    ports: ["3000:3000"]
+    profiles: [observability]
+    networks: [platform]
+
+volumes:
+  postgres-data:
+
+networks:
+  platform:
+    name: platform
+    external: true
