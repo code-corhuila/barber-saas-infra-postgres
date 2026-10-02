@@ -10,6 +10,7 @@ include:
   - path: ../barber-saas-barbershop-db/deploy/compose.yml
   - path: ../barber-saas-barbershop-api/deploy/compose.yml
   - path: ../barber-saas-schedule-db/deploy/compose.yml
+  - path: ../barber-saas-schedule-api/deploy/compose.yml
   # one line per repository the platform runs; a missing sibling fails loudly on `up`
 
 services:
