@@ -3,6 +3,11 @@
 # into this instance; every -api connects with its own <domain>_app user, never as the
 # administrator. The project name comes from env/<environment>.env (COMPOSE_PROJECT_NAME),
 # so dev, qa and main get their own container and volume.
+include:
+  - path: ../barber-saas-identity-auth-db/deploy/compose.yml
+  - path: ../barber-saas-identity-auth-api/deploy/compose.yml
+  # one line per repository the platform runs; a missing sibling fails loudly on `up`
+
 services:
   postgres:
     image: postgres:16.4-alpine
