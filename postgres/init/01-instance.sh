@@ -2,8 +2,9 @@
 # Prepares the single PostgreSQL instance (Annex J J.4, J.5.5, J.7). Safe to run again:
 # extensions and users are created only when missing. Each -db creates its own schema,
 # roles and grants; this script only creates what belongs to the whole instance.
-# Runs automatically once, when the volume is empty. After adding a domain, run it by hand
-# in every existing environment:
+# PostgreSQL runs it once, when the volume is empty; scripts/migrate.sh (and so up.sh) runs it
+# again before every migration, so an existing volume gets new extensions and users too.
+# By hand:
 #   docker compose --env-file env/dev.env exec postgres sh /docker-entrypoint-initdb.d/01-instance.sh
 set -eu
 
