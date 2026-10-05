@@ -41,7 +41,7 @@ Clone the repositories as siblings with their full names (`barber-saas-infra`,
 ```bash
 cd barber-saas-infra
 cp env/dev.env.example env/dev.env      # set PG_ADMIN_PASSWORD and every *_APP_PASSWORD
-./scripts/dev-keys.sh                   # development RS256 keys and service token
+./scripts/dev-keys.sh                   # development RS256 keys and one service token per service
 ./scripts/up.sh dev                     # network, PostgreSQL, migrations of every -db, services
 ```
 
