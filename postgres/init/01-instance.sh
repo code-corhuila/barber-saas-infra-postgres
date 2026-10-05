@@ -23,6 +23,8 @@ SQL
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" <<SQL
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- btree_gist: EXCLUDE constraints that mix = on uuid with && on ranges (appointment double booking)
+CREATE EXTENSION IF NOT EXISTS btree_gist;
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 SQL
 
