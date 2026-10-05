@@ -66,5 +66,7 @@ each `<domain>_app` writes only to its own schema.
 
 ### What is missing
 
-Only identity-auth is composed so far; the other domains, the gateway and the front are added to
+Composed today: identity-auth, barbershop, schedule and appointment (each `-db` and `-api`), the
+gateway and the workflow (its service and the `workflow` schema, ADR-009). Loyalty, notifications,
+finance-inventory, platform-admin, the worker and the front are added to
 `include` as they are built. Observability starts with `--profile observability`.
