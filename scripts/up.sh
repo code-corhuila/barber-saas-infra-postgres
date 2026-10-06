@@ -8,10 +8,13 @@ env_file="env/${environment}.env"
 
 [ -f "$env_file" ] || { echo "missing $env_file: cp env/${environment}.env.example $env_file and fill it in"; exit 1; }
 grep -q '^PG_ADMIN_PASSWORD=.' "$env_file" || { echo "PG_ADMIN_PASSWORD is empty in $env_file"; exit 1; }
+for key in MONGO_ADMIN_PASSWORD MONGO_REPLICA_KEY; do
+  grep -q "^$key=." "$env_file" || { echo "$key is empty in $env_file"; exit 1; }
+done
 grep -q '^JWT_PUBLIC_KEY=.' "$env_file" || { echo "JWT_PUBLIC_KEY is empty: run ./scripts/dev-keys.sh (dev only)"; exit 1; }
 
 docker network inspect platform >/dev/null 2>&1 || docker network create platform
-docker compose --env-file "$env_file" up -d --wait postgres
+docker compose --env-file "$env_file" up -d --wait postgres mongo
 ./scripts/migrate.sh "$environment"
 docker compose --env-file "$env_file" up -d --build --wait
 docker compose --env-file "$env_file" ps
