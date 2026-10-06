@@ -46,6 +46,9 @@ cp env/dev.env.example env/dev.env      # set PG_ADMIN_PASSWORD and every *_APP_
 ./scripts/up.sh dev                     # network, PostgreSQL, migrations of every -db, services
 ```
 
+`./scripts/dev-super-admin.sh` (development only) creates the `SUPER_ADMIN` of `DEV_SUPER_ADMIN_EMAIL` /
+`DEV_SUPER_ADMIN_PASSWORD`, who signs in to *Plataforma*; running it again changes nothing.
+
 `./scripts/migrate.sh dev` applies pending migrations again (a second run applies nothing). It
 first re-runs `postgres/init/01-instance.sh`, so after a `git pull` that adds an extension or a
 `<domain>_app` user, the next `up.sh` or `migrate.sh` creates it in your existing volume.
