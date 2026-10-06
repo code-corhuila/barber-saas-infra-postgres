@@ -22,14 +22,16 @@ workflow_token=$(./scripts/dev-token.sh barber-saas-workflow SERVICE 1440)
 worker_token=$(./scripts/dev-token.sh barber-saas-worker SERVICE 1440)
 barbershop_token=$(./scripts/dev-token.sh barber-saas-barbershop-api SERVICE 1440)
 schedule_token=$(./scripts/dev-token.sh barber-saas-schedule-api SERVICE 1440)
+platform_admin_token=$(./scripts/dev-token.sh barber-saas-platform-admin-api SERVICE 1440)
 
 grep -v -e '^JWT_PRIVATE_KEY=' -e '^JWT_PUBLIC_KEY=' -e '^SERVICE_TOKEN=' -e '^WORKFLOW_SERVICE_TOKEN=' -e '^WORKER_SERVICE_TOKEN=' \
-  -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' "$env_file" > "$env_file.tmp" || true
+  -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' -e '^PLATFORM_ADMIN_SERVICE_TOKEN=' "$env_file" > "$env_file.tmp" || true
 printf 'JWT_PRIVATE_KEY="%s"\n' "$private_key" >> "$env_file.tmp"
 printf 'JWT_PUBLIC_KEY="%s"\n' "$public_key" >> "$env_file.tmp"
 printf 'WORKFLOW_SERVICE_TOKEN=%s\n' "$workflow_token" >> "$env_file.tmp"
 printf 'WORKER_SERVICE_TOKEN=%s\n' "$worker_token" >> "$env_file.tmp"
 printf 'BARBERSHOP_SERVICE_TOKEN=%s\n' "$barbershop_token" >> "$env_file.tmp"
 printf 'SCHEDULE_SERVICE_TOKEN=%s\n' "$schedule_token" >> "$env_file.tmp"
+printf 'PLATFORM_ADMIN_SERVICE_TOKEN=%s\n' "$platform_admin_token" >> "$env_file.tmp"
 mv "$env_file.tmp" "$env_file"
 echo "keys/ and $env_file updated. A user token: ./scripts/dev-token.sh <subject> [role] [minutes]"
