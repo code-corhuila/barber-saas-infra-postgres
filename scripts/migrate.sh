@@ -11,6 +11,8 @@ env_file="env/${environment}.env"
 # volume also gets every extension and <domain>_app user added since it was created; a migration
 # that needs a new extension (btree_gist for appointment) would fail otherwise. It is idempotent.
 docker compose --env-file "$env_file" exec -T postgres sh /docker-entrypoint-initdb.d/01-instance.sh
+# The same for MongoDB: mongo-init (barber-saas-infra-mongo) creates the missing <domain>_app users.
+docker compose --env-file "$env_file" --profile tooling run --rm mongo-init
 
 runners=$(docker compose --env-file "$env_file" --profile tooling config --services | grep -- '-db-migrate$' || true)
 [ -n "$runners" ] || { echo "no -db-migrate runner in the composition"; exit 0; }
