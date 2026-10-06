@@ -4,6 +4,8 @@
 # administrator. The project name comes from env/<environment>.env (COMPOSE_PROJECT_NAME),
 # so dev, qa and main get their own container and volume.
 include:
+  # The single MongoDB instance (Annex J J.8.1): its container, volume and users live there.
+  - path: ../barber-saas-infra-mongo/compose.yml
   - path: ../barber-saas-identity-auth-db/deploy/compose.yml
   - path: ../barber-saas-identity-auth-api/deploy/compose.yml
   - path: ../barber-saas-api-gateway/deploy/compose.yml
