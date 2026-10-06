@@ -31,7 +31,8 @@ Full policy: `00-governance/branching-policy.md` in `barber-saas-docs`.
 The single PostgreSQL instance of the platform and the root composition (ADR-011, course norm
 Annex J). It defines the instance, its volume, the extensions and one `<domain>_app` user per
 domain; every `barber-saas-<domain>-db` migrates its own schema into it, and every service
-connects with its own user. It is not the MongoDB instance (that is `barber-saas-infra-mongo`).
+connects with its own user. The MongoDB instance is `barber-saas-infra-mongo`, which this root
+composition includes: `up.sh` starts both engines and `migrate.sh` prepares both.
 
 ### How to start it
 
