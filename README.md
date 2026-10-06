@@ -1,4 +1,4 @@
-# barber-saas-infra
+# barber-saas-infra-postgres
 
 > Compose/IaC, observability, environments and secrets
 
@@ -35,11 +35,11 @@ connects with its own user. It is not the MongoDB instance (that is `barber-saas
 
 ### How to start it
 
-Clone the repositories as siblings with their full names (`barber-saas-infra`,
+Clone the repositories as siblings with their full names (`barber-saas-infra-postgres`,
 `barber-saas-identity-auth-db`, `barber-saas-identity-auth-api`, …), then:
 
 ```bash
-cd barber-saas-infra
+cd barber-saas-infra-postgres
 cp env/dev.env.example env/dev.env      # set PG_ADMIN_PASSWORD and every *_APP_PASSWORD
 ./scripts/dev-keys.sh                   # development RS256 keys and one service token per service
 ./scripts/up.sh dev                     # network, PostgreSQL, migrations of every -db, services
