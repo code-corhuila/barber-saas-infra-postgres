@@ -21,6 +21,8 @@ include:
   - path: ../barber-saas-finance-inventory-api/deploy/compose.yml
   # The workflow brings its service and workflow-db-migrate, which migrate.sh runs like any -db (ADR-009).
   - path: ../barber-saas-workflow/deploy/compose.yml
+  # The worker relays the outboxes and runs the daily jobs (ADR-016).
+  - path: ../barber-saas-worker/deploy/compose.yml
   # one line per repository the platform runs; a missing sibling fails loudly on `up`
 
 services:
