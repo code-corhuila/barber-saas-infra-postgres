@@ -20,6 +20,7 @@ include:
   - path: ../barber-saas-finance-inventory-db/deploy/compose.yml
   - path: ../barber-saas-finance-inventory-api/deploy/compose.yml
   - path: ../barber-saas-loyalty-db/deploy/compose.yml
+  - path: ../barber-saas-loyalty-api/deploy/compose.yml
   # The notifications database migrates into the MongoDB instance, after mongo-init (migrate.sh).
   - path: ../barber-saas-notifications-db/deploy/compose.yml
   - path: ../barber-saas-notifications-api/deploy/compose.yml
