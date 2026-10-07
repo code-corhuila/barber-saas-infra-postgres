@@ -54,6 +54,15 @@ first re-runs `postgres/init/01-instance.sh`, so after a `git pull` that adds an
 `<domain>_app` user, the next `up.sh` or `migrate.sh` creates it in your existing volume.
 `./scripts/down.sh dev` stops everything and keeps the volume. Never use `down -v` in qa or main.
 
+### Personal credentials — never versioned
+
+`env/<environment>.env` holds the real values and is ignored; the `*.env.example` files only name the
+variables, empty. `FCM_SERVICE_ACCOUNT_JSON` (push through Firebase) is a personal secret of whoever owns
+the Firebase project: leave it empty unless you use your own project, prefer exporting it in your shell
+from a file outside the repository over writing it in `env/dev.env`, and never commit, push or share
+it. The `Secrets` workflow fails any pull request that carries an env file, a Firebase file, a private
+key or an example with a value.
+
 ### Where the data is
 
 | | Value |
