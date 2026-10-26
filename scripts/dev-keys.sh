@@ -4,7 +4,7 @@
 # validates with, and one service token per calling service, with the service name as `sub`
 # (07-api/authentication.md): the workflow's, the worker's, and those of the domain services
 # that call another domain's internal operation (barbershop-api: ADR-014; schedule-api:
-# ADR-015). qa and main use
+# ADR-015; appointment-api and notifications-api: DEC-APPT-11, DEC-NOTIF-02). qa and main use
 # keys issued by identity-auth and injected as secrets — never these (norm 5.9.2).
 set -eu
 cd "$(dirname "$0")/.."
@@ -23,9 +23,12 @@ worker_token=$(./scripts/dev-token.sh barber-saas-worker SERVICE 1440)
 barbershop_token=$(./scripts/dev-token.sh barber-saas-barbershop-api SERVICE 1440)
 schedule_token=$(./scripts/dev-token.sh barber-saas-schedule-api SERVICE 1440)
 platform_admin_token=$(./scripts/dev-token.sh barber-saas-platform-admin-api SERVICE 1440)
+appointment_token=$(./scripts/dev-token.sh barber-saas-appointment-api SERVICE 1440)
+notifications_token=$(./scripts/dev-token.sh barber-saas-notifications-api SERVICE 1440)
 
 grep -v -e '^JWT_PRIVATE_KEY=' -e '^JWT_PUBLIC_KEY=' -e '^SERVICE_TOKEN=' -e '^WORKFLOW_SERVICE_TOKEN=' -e '^WORKER_SERVICE_TOKEN=' \
-  -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' -e '^PLATFORM_ADMIN_SERVICE_TOKEN=' "$env_file" > "$env_file.tmp" || true
+  -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' -e '^PLATFORM_ADMIN_SERVICE_TOKEN=' \
+  -e '^APPOINTMENT_SERVICE_TOKEN=' -e '^NOTIFICATIONS_SERVICE_TOKEN=' "$env_file" > "$env_file.tmp" || true
 printf 'JWT_PRIVATE_KEY="%s"\n' "$private_key" >> "$env_file.tmp"
 printf 'JWT_PUBLIC_KEY="%s"\n' "$public_key" >> "$env_file.tmp"
 printf 'WORKFLOW_SERVICE_TOKEN=%s\n' "$workflow_token" >> "$env_file.tmp"
@@ -33,5 +36,7 @@ printf 'WORKER_SERVICE_TOKEN=%s\n' "$worker_token" >> "$env_file.tmp"
 printf 'BARBERSHOP_SERVICE_TOKEN=%s\n' "$barbershop_token" >> "$env_file.tmp"
 printf 'SCHEDULE_SERVICE_TOKEN=%s\n' "$schedule_token" >> "$env_file.tmp"
 printf 'PLATFORM_ADMIN_SERVICE_TOKEN=%s\n' "$platform_admin_token" >> "$env_file.tmp"
+printf 'APPOINTMENT_SERVICE_TOKEN=%s\n' "$appointment_token" >> "$env_file.tmp"
+printf 'NOTIFICATIONS_SERVICE_TOKEN=%s\n' "$notifications_token" >> "$env_file.tmp"
 mv "$env_file.tmp" "$env_file"
 echo "keys/ and $env_file updated. A user token: ./scripts/dev-token.sh <subject> [role] [minutes]"
