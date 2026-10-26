@@ -1,0 +1,26 @@
+#cloud-config
+# Oracle Cloud Always Free Ampere A1 VM, Canonical Ubuntu 24.04 (ADR-019). Paste it in "Show advanced
+# options → Management → Initialization script" when creating the instance. It installs Docker, opens
+# 80 and 443 in the host firewall (Oracle's Ubuntu images block them even when the VCN allows them),
+# and clones every repository on main under /opt/barbersaas. Secrets are NOT here: env/main.env is
+# written by hand on the VM (docs/deploy-oracle.md).
+package_update: true
+packages:
+  - docker.io
+  - docker-compose-v2
+  - git
+  - openssl
+  - iptables-persistent
+
+runcmd:
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - netfilter-persistent save
+  - mkdir -p /opt/barbersaas
+  - git clone --branch main https://github.com/code-corhuila/barber-saas-infra-postgres.git /opt/barbersaas/barber-saas-infra-postgres
+  - sh /opt/barbersaas/barber-saas-infra-postgres/scripts/clone-all.sh main
+  - chown -R ubuntu:ubuntu /opt/barbersaas
+  # Daily backup at 03:00 (Colombia is UTC-5: 08:00 UTC); the weekly copy off the machine is manual.
+  - echo '0 8 * * * ubuntu cd /opt/barbersaas/barber-saas-infra-postgres && ./scripts/backup.sh main >> backups.log 2>&1' > /etc/cron.d/barbersaas-backup
