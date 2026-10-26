@@ -1,0 +1,25 @@
+# The public face of the main host (ADR-019): Caddy terminates HTTPS with a free Let's Encrypt
+# certificate for PUBLIC_HOST and forwards everything to the gateway, the only service it sees.
+# Used only on the host, on top of compose.yml:
+#   docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --wait
+# The host firewall opens 80 and 443 only; the gateway's 8000 stays closed to the internet.
+services:
+  caddy:
+    image: caddy:2.8.4-alpine
+    command: ["caddy", "reverse-proxy", "--from", "${PUBLIC_HOST:?set PUBLIC_HOST, e.g. barbersaas.duckdns.org}",
+              "--to", "api-gateway:8000"]
+    ports: ["80:80", "443:443"]
+    volumes:
+      - caddy-data:/data
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    restart: unless-stopped
+    networks: [platform]
+
+volumes:
+  caddy-data:
