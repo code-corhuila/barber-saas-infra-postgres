@@ -6,9 +6,14 @@
 # that call another domain's internal operation (barbershop-api: ADR-014; schedule-api:
 # ADR-015; appointment-api and notifications-api: DEC-APPT-11, DEC-NOTIF-02). qa and main use
 # keys issued by identity-auth and injected as secrets — never these (norm 5.9.2).
+# On the main host (ADR-019) run it THERE, never copy dev keys: ./scripts/dev-keys.sh main 525600
+# creates that host's own key pair and service tokens valid one year.
+# usage: ./scripts/dev-keys.sh [environment=dev] [service-token-minutes=1440]
 set -eu
 cd "$(dirname "$0")/.."
-env_file="env/dev.env"
+environment="${1:-dev}"
+minutes="${2:-1440}"
+env_file="env/${environment}.env"
 [ -f "$env_file" ] || { echo "missing $env_file: cp env/dev.env.example $env_file"; exit 1; }
 
 mkdir -p keys
@@ -18,13 +23,13 @@ openssl pkey -in keys/jwt-private.pem -pubout -out keys/jwt-public.pem
 # One line with literal \n escapes: that is how an env file holds a PEM.
 private_key=$(awk '{ printf "%s\\n", $0 }' keys/jwt-private.pem)
 public_key=$(awk '{ printf "%s\\n", $0 }' keys/jwt-public.pem)
-workflow_token=$(./scripts/dev-token.sh barber-saas-workflow SERVICE 1440)
-worker_token=$(./scripts/dev-token.sh barber-saas-worker SERVICE 1440)
-barbershop_token=$(./scripts/dev-token.sh barber-saas-barbershop-api SERVICE 1440)
-schedule_token=$(./scripts/dev-token.sh barber-saas-schedule-api SERVICE 1440)
-platform_admin_token=$(./scripts/dev-token.sh barber-saas-platform-admin-api SERVICE 1440)
-appointment_token=$(./scripts/dev-token.sh barber-saas-appointment-api SERVICE 1440)
-notifications_token=$(./scripts/dev-token.sh barber-saas-notifications-api SERVICE 1440)
+workflow_token=$(./scripts/dev-token.sh barber-saas-workflow SERVICE "$minutes")
+worker_token=$(./scripts/dev-token.sh barber-saas-worker SERVICE "$minutes")
+barbershop_token=$(./scripts/dev-token.sh barber-saas-barbershop-api SERVICE "$minutes")
+schedule_token=$(./scripts/dev-token.sh barber-saas-schedule-api SERVICE "$minutes")
+platform_admin_token=$(./scripts/dev-token.sh barber-saas-platform-admin-api SERVICE "$minutes")
+appointment_token=$(./scripts/dev-token.sh barber-saas-appointment-api SERVICE "$minutes")
+notifications_token=$(./scripts/dev-token.sh barber-saas-notifications-api SERVICE "$minutes")
 
 grep -v -e '^JWT_PRIVATE_KEY=' -e '^JWT_PUBLIC_KEY=' -e '^SERVICE_TOKEN=' -e '^WORKFLOW_SERVICE_TOKEN=' -e '^WORKER_SERVICE_TOKEN=' \
   -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' -e '^PLATFORM_ADMIN_SERVICE_TOKEN=' \
