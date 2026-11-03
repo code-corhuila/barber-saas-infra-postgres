@@ -9,8 +9,9 @@ upgraded to "Pay As You Go".
 1. Create an Oracle Cloud Free Tier account (https://www.oracle.com/cloud/free/). A card is asked only to
    verify identity. Choose the home region carefully: Always Free resources exist only there.
 2. *Compute → Instances → Create instance*:
-   - Image: **Canonical Ubuntu 24.04**. Shape: **Ampere → VM.Standard.A1.Flex**, 4 OCPU and 24 GB
-     (the Always Free limit). If it answers "Out of host capacity", try another availability domain or
+   - Image: **Canonical Ubuntu 24.04**. Shape: **Ampere → VM.Standard.A1.Flex**, **2 OCPU and 12 GB**
+     (the Always Free limit since June 2026; it was 4 OCPU and 24 GB before). Check that the shape says
+     "Always Free-eligible": a bigger shape on a free account can be refused or charged. If it answers "Out of host capacity", try another availability domain or
      try again later.
    - Add your SSH public key.
    - *Show advanced options → Management → Initialization script*: paste
@@ -39,7 +40,7 @@ password manager, never in git or in a chat.
 ```bash
 docker compose -f compose.yml --env-file env/main.env up -d --wait postgres mongo
 ./scripts/migrate.sh main
-docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --build --wait
+COMPOSE_PARALLEL_LIMIT=2 docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --build --wait
 curl https://<PUBLIC_HOST>/health
 ```
 
@@ -55,14 +56,22 @@ cd /opt/barbersaas/barber-saas-infra-postgres
 ./scripts/backup.sh main                 # always before migrating (Annex J J.5.4)
 ./scripts/clone-all.sh main && git pull --ff-only
 ./scripts/migrate.sh main
-docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --build --wait
+COMPOSE_PARALLEL_LIMIT=2 docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --build --wait
 ```
+
+`COMPOSE_PARALLEL_LIMIT=2` builds two images at a time: eight Maven builds at once do not fit in 12 GB
+next to the running platform. The first build takes 20–30 minutes on 2 OCPU; the platform itself uses
+about 2 GB of the 12 (the containers' limits add up to about 5.6 GB).
 
 Rollback: check out the previous tag in the repository that broke (`git -C ../barber-saas-<repo> checkout
 v<previous>`) and run the last command again. A database change is undone only with its `05_rollbacks`
 changeset or the backup.
 
 ## 5. Keeping it healthy
+
+- Oracle reclaims an Always Free instance that looks idle for 7 days: CPU (95th percentile), network and,
+  on A1 shapes, memory all under 20 %. The platform at rest uses about 18 % of the memory, so keep it in
+  real use (tests, the demo) and check *Compute → Instances* for a reclaim warning e-mail.
 
 - `cron` runs `./scripts/backup.sh main` every day at 03:00 (cloud-init). Copy `backups/` off the VM
   once a week (`scp -r ubuntu@<ip>:/opt/barbersaas/barber-saas-infra-postgres/backups .`).
