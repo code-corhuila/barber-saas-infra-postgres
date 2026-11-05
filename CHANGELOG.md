@@ -4,6 +4,29 @@ All notable changes to `barber-saas-infra-postgres` are recorded here. The forma
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-11-05
+
+MVP 3 (corte 3): promoted from `develop` through `qa` with `git cherry-pick -x` (norm 10–11).
+
+User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs#123, code-corhuila/barber-saas-docs#127, code-corhuila/barber-saas-docs#157.
+
+### Added
+
+- **dev-keys:** issue service tokens for appointment-api and notifications-api
+- **keys:** issue the keys of any environment with a chosen token lifetime
+- **public:** serve the gateway over HTTPS with Caddy on the main host
+- **scripts:** clone every repository and back up both databases
+- **env:** set PAYMENTS_SIMULATOR per environment
+
+### Fixed
+
+- **dev-super-admin:** create the SUPER_ADMIN with a verified e-mail
+
+### Documentation
+
+- **deploy:** deploy main on an Oracle Cloud Always Free VM
+- **deploy:** create the Oracle VM with 2 OCPU and 12 GB and build two images at a time
+
 ## [2.0.0] - 2026-10-08
 
 MVP 2 (corte 2): first release of this repository to `main`, promoted from `develop` through `qa`
@@ -65,4 +88,5 @@ User stories: code-corhuila/barber-saas-docs#3, code-corhuila/barber-saas-docs#4
 - skip the workflow's own pattern and print only file names
 - **env:** name the smtp variables of the password-reset e-mail
 
+[3.0.0]: https://github.com/code-corhuila/barber-saas-infra-postgres/releases/tag/v3.0.0
 [2.0.0]: https://github.com/code-corhuila/barber-saas-infra-postgres/releases/tag/v2.0.0
