@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# A dump of both database instances (ADR-019, Annex J J.5.4): PostgreSQL with pg_dumpall and MongoDB
+# A dump of both database instances (ADR-020, Annex J J.5.4): PostgreSQL with pg_dumpall and MongoDB
 # with mongodump, into backups/<date>/, keeping the last 7. Run it daily from cron on the host and
 # copy backups/ off the machine once a week; a backup that stays on the same disk is not a backup.
 # usage: ./scripts/backup.sh [environment=main]

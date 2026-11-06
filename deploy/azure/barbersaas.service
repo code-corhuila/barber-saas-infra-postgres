@@ -1,0 +1,18 @@
+# Starts the platform at boot, so a VM stopped from the portal comes back by itself (ADR-020).
+# --no-build: a boot never rebuilds; the images are those of the last deployment.
+[Unit]
+Description=BarberSaaS platform (docker compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/barbersaas/barber-saas-infra-postgres
+ExecStartPre=-/usr/bin/docker network create platform
+ExecStart=/usr/bin/docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --no-build
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target
