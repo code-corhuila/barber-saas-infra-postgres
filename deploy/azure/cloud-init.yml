@@ -1,0 +1,25 @@
+#cloud-config
+# Azure VM, Canonical Ubuntu 24.04, username ubuntu (ADR-020). Paste it in "Advanced → Custom data" when creating
+# the VM. It installs Docker, clones every repository on qa (release candidate; switch to main after the release)
+# under /opt/barbersaas and starts the platform at boot. Secrets are NOT here: env/main.env is written by hand on
+# the VM (deploy/azure/README.md).
+package_update: true
+packages:
+  - docker.io
+  - docker-compose-v2
+  - git
+  - openssl
+
+runcmd:
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+  - mkdir -p /opt/barbersaas
+  - git clone --branch qa https://github.com/code-corhuila/barber-saas-infra-postgres.git /opt/barbersaas/barber-saas-infra-postgres
+  - sh /opt/barbersaas/barber-saas-infra-postgres/scripts/clone-all.sh qa
+  - chown -R ubuntu:ubuntu /opt/barbersaas
+  - docker network create platform
+  - cp /opt/barbersaas/barber-saas-infra-postgres/deploy/azure/barbersaas.service /etc/systemd/system/
+  - systemctl daemon-reload
+  - systemctl enable barbersaas.service
+  # Daily backup at 03:00 (Colombia is UTC-5: 08:00 UTC); the copy off the machine is manual.
+  - echo '0 8 * * * ubuntu cd /opt/barbersaas/barber-saas-infra-postgres && ./scripts/backup.sh main >> backups.log 2>&1' > /etc/cron.d/barbersaas-backup
