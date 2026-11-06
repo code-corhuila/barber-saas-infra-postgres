@@ -6,10 +6,11 @@
 services:
   caddy:
     image: caddy:2.8.4-alpine
-    command: ["caddy", "reverse-proxy", "--from", "${PUBLIC_HOST:?set PUBLIC_HOST, e.g. barbersaas.duckdns.org}",
-              "--to", "api-gateway:8000"]
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?set PUBLIC_HOST, e.g. barbersaas.duckdns.org}
     ports: ["80:80", "443:443"]
     volumes:
+      - ./deploy/oracle/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
     depends_on:
       api-gateway:
