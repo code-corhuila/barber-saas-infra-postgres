@@ -1,4 +1,4 @@
-# The public face of the main host (ADR-019): HTTPS for PUBLIC_HOST and everything to the gateway.
+# The public face of the main host (ADR-020): HTTPS for PUBLIC_HOST and everything to the gateway.
 # The gateway answers within 10 s (proxy_read_timeout); the 30 s here is the outer bound for a gateway
 # that hangs, so a slow backend cannot hold a connection open (docs#155).
 {$PUBLIC_HOST} {

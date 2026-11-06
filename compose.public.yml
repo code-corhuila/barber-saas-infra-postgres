@@ -1,4 +1,4 @@
-# The public face of the main host (ADR-019): Caddy terminates HTTPS with a free Let's Encrypt
+# The public face of the main host (ADR-020): Caddy terminates HTTPS with a free Let's Encrypt
 # certificate for PUBLIC_HOST and forwards everything to the gateway, the only service it sees.
 # Used only on the host, on top of compose.yml:
 #   docker compose -f compose.yml -f compose.public.yml --env-file env/main.env up -d --wait
@@ -7,10 +7,10 @@ services:
   caddy:
     image: caddy:2.8.4-alpine
     environment:
-      PUBLIC_HOST: ${PUBLIC_HOST:?set PUBLIC_HOST, e.g. barbersaas.duckdns.org}
+      PUBLIC_HOST: ${PUBLIC_HOST:?set PUBLIC_HOST, e.g. barbersaas.chilecentral.cloudapp.azure.com}
     ports: ["80:80", "443:443"]
     volumes:
-      - ./deploy/oracle/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./deploy/azure/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
     depends_on:
       api-gateway:
