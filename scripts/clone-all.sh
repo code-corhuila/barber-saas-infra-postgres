@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Clones every repository of the platform as siblings of this one, with the names compose.yml
-# includes (barber-saas-<repo>), on the given branch: what a new host needs (ADR-019).
+# includes (barber-saas-<repo>), on the given branch: what a new host needs (ADR-020).
 # usage: ./scripts/clone-all.sh [branch=main]
 set -eu
 cd "$(dirname "$0")/../.."
