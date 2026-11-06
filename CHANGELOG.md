@@ -12,6 +12,7 @@ User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs
 
 ### Added
 
+- **security:** close a request caddy waits on for more than 30 s
 - **dev-keys:** issue service tokens for appointment-api and notifications-api
 - **keys:** issue the keys of any environment with a chosen token lifetime
 - **public:** serve the gateway over HTTPS with Caddy on the main host
