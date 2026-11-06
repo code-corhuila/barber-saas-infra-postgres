@@ -6,7 +6,7 @@
 # that call another domain's internal operation (barbershop-api: ADR-014; schedule-api:
 # ADR-015; appointment-api and notifications-api: DEC-APPT-11, DEC-NOTIF-02). qa and main use
 # keys issued by identity-auth and injected as secrets — never these (norm 5.9.2).
-# On the main host (ADR-019) run it THERE, never copy dev keys: ./scripts/dev-keys.sh main 525600
+# On the main host (ADR-020) run it THERE, never copy dev keys: ./scripts/dev-keys.sh main 525600
 # creates that host's own key pair and service tokens valid one year.
 # usage: ./scripts/dev-keys.sh [environment=dev] [service-token-minutes=1440]
 set -eu
