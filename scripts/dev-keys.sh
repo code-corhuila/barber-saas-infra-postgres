@@ -6,13 +6,16 @@
 # that call another domain's internal operation (barbershop-api: ADR-014; schedule-api:
 # ADR-015; appointment-api and notifications-api: DEC-APPT-11, DEC-NOTIF-02). qa and main use
 # keys issued by identity-auth and injected as secrets — never these (norm 5.9.2).
-# On the main host (ADR-020) run it THERE, never copy dev keys: ./scripts/dev-keys.sh main 525600
-# creates that host's own key pair and service tokens valid one year.
+# The worker also gets one token per service it calls: `aud` is that service and `scope` only
+# what the worker does there (docs#158, docs#159). Service tokens live at most 7 days (10080 min).
+# On the main host (ADR-020) run it THERE, never copy dev keys: ./scripts/dev-keys.sh main 10080
+# creates that host's own key pair and service tokens valid 7 days; cron renews them weekly.
 # usage: ./scripts/dev-keys.sh [environment=dev] [service-token-minutes=1440]
 set -eu
 cd "$(dirname "$0")/.."
 environment="${1:-dev}"
 minutes="${2:-1440}"
+[ "$minutes" -le 10080 ] || { echo "service tokens live at most 7 days (10080 minutes)"; exit 1; }
 env_file="env/${environment}.env"
 [ -f "$env_file" ] || { echo "missing $env_file: cp env/dev.env.example $env_file"; exit 1; }
 
@@ -25,6 +28,14 @@ private_key=$(awk '{ printf "%s\\n", $0 }' keys/jwt-private.pem)
 public_key=$(awk '{ printf "%s\\n", $0 }' keys/jwt-public.pem)
 workflow_token=$(./scripts/dev-token.sh barber-saas-workflow SERVICE "$minutes")
 worker_token=$(./scripts/dev-token.sh barber-saas-worker SERVICE "$minutes")
+# The worker's token for each service it calls: that service as `aud`, only its scopes.
+worker_for() { ./scripts/dev-token.sh barber-saas-worker SERVICE "$minutes" "" "barber-saas-$1" "$2"; }
+worker_appointment=$(worker_for appointment-api "outbox:relay jobs:run")
+worker_loyalty=$(worker_for loyalty-api "outbox:relay events:deliver")
+worker_identity_auth=$(worker_for identity-auth-api "outbox:relay")
+worker_platform_admin=$(worker_for platform-admin-api "outbox:relay jobs:run subscriptions:expire")
+worker_notifications=$(worker_for notifications-api "events:deliver")
+worker_finance_inventory=$(worker_for finance-inventory-api "events:deliver")
 barbershop_token=$(./scripts/dev-token.sh barber-saas-barbershop-api SERVICE "$minutes")
 schedule_token=$(./scripts/dev-token.sh barber-saas-schedule-api SERVICE "$minutes")
 platform_admin_token=$(./scripts/dev-token.sh barber-saas-platform-admin-api SERVICE "$minutes")
@@ -33,11 +44,18 @@ notifications_token=$(./scripts/dev-token.sh barber-saas-notifications-api SERVI
 
 grep -v -e '^JWT_PRIVATE_KEY=' -e '^JWT_PUBLIC_KEY=' -e '^SERVICE_TOKEN=' -e '^WORKFLOW_SERVICE_TOKEN=' -e '^WORKER_SERVICE_TOKEN=' \
   -e '^BARBERSHOP_SERVICE_TOKEN=' -e '^SCHEDULE_SERVICE_TOKEN=' -e '^PLATFORM_ADMIN_SERVICE_TOKEN=' \
-  -e '^APPOINTMENT_SERVICE_TOKEN=' -e '^NOTIFICATIONS_SERVICE_TOKEN=' "$env_file" > "$env_file.tmp" || true
+  -e '^APPOINTMENT_SERVICE_TOKEN=' -e '^NOTIFICATIONS_SERVICE_TOKEN=' -e '^WORKER_[A-Z_]*_TOKEN=' \
+  "$env_file" > "$env_file.tmp" || true
 printf 'JWT_PRIVATE_KEY="%s"\n' "$private_key" >> "$env_file.tmp"
 printf 'JWT_PUBLIC_KEY="%s"\n' "$public_key" >> "$env_file.tmp"
 printf 'WORKFLOW_SERVICE_TOKEN=%s\n' "$workflow_token" >> "$env_file.tmp"
 printf 'WORKER_SERVICE_TOKEN=%s\n' "$worker_token" >> "$env_file.tmp"
+printf 'WORKER_APPOINTMENT_TOKEN=%s\n' "$worker_appointment" >> "$env_file.tmp"
+printf 'WORKER_LOYALTY_TOKEN=%s\n' "$worker_loyalty" >> "$env_file.tmp"
+printf 'WORKER_IDENTITY_AUTH_TOKEN=%s\n' "$worker_identity_auth" >> "$env_file.tmp"
+printf 'WORKER_PLATFORM_ADMIN_TOKEN=%s\n' "$worker_platform_admin" >> "$env_file.tmp"
+printf 'WORKER_NOTIFICATIONS_TOKEN=%s\n' "$worker_notifications" >> "$env_file.tmp"
+printf 'WORKER_FINANCE_INVENTORY_TOKEN=%s\n' "$worker_finance_inventory" >> "$env_file.tmp"
 printf 'BARBERSHOP_SERVICE_TOKEN=%s\n' "$barbershop_token" >> "$env_file.tmp"
 printf 'SCHEDULE_SERVICE_TOKEN=%s\n' "$schedule_token" >> "$env_file.tmp"
 printf 'PLATFORM_ADMIN_SERVICE_TOKEN=%s\n' "$platform_admin_token" >> "$env_file.tmp"
