@@ -8,7 +8,7 @@ All notable changes to `barber-saas-infra-postgres` are recorded here. The forma
 
 MVP 3 (corte 3): promoted from `develop` through `qa` with `git cherry-pick -x` (norm 10–11).
 
-User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs#123, code-corhuila/barber-saas-docs#127, code-corhuila/barber-saas-docs#157.
+User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs#123, code-corhuila/barber-saas-docs#127, code-corhuila/barber-saas-docs#157, code-corhuila/barber-saas-docs#158, code-corhuila/barber-saas-docs#159, code-corhuila/barber-saas-docs#164.
 
 ### Added
 
@@ -19,6 +19,9 @@ User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs
 - **public:** serve the gateway over HTTPS with Caddy on the main host
 - **scripts:** clone every repository and back up both databases
 - **env:** set PAYMENTS_SIMULATOR per environment
+- **scripts:** issue aud and scope in development tokens
+- **scripts:** issue one worker token per called service, seven days at most
+- **env:** name the worker's token per called service
 
 ### Fixed
 
@@ -28,6 +31,7 @@ User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs
 
 - **deploy:** deploy main on an Oracle Cloud Always Free VM
 - **deploy:** create the Oracle VM with 2 OCPU and 12 GB and build two images at a time
+- **deploy:** renew the service tokens every week on the public host
 
 ## [2.0.0] - 2026-10-08
 
