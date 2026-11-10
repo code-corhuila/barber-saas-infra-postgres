@@ -23,3 +23,5 @@ runcmd:
   - systemctl enable barbersaas.service
   # Daily backup at 03:00 (Colombia is UTC-5: 08:00 UTC); the copy off the machine is manual.
   - echo '0 8 * * * ubuntu cd /opt/barbersaas/barber-saas-infra-postgres && ./scripts/backup.sh main >> backups.log 2>&1' > /etc/cron.d/barbersaas-backup
+  # Service tokens live 7 days (docs#158): renewed every Sunday at 03:30 (08:30 UTC), then the services restart.
+  - echo '30 8 * * 0 ubuntu cd /opt/barbersaas/barber-saas-infra-postgres && ./scripts/dev-keys.sh main 10080 && ./scripts/up.sh main >> tokens.log 2>&1' > /etc/cron.d/barbersaas-tokens
