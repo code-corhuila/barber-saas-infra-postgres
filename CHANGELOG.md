@@ -27,6 +27,7 @@ User stories: code-corhuila/barber-saas-docs#122, code-corhuila/barber-saas-docs
 
 - **dev-super-admin:** create the SUPER_ADMIN with a verified e-mail
 - **env:** close the simulated checkout on main
+- **scripts:** make clone-all, backup and dev-super-admin executable
 
 ### Documentation
 
