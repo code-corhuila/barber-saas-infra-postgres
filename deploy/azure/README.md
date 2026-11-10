@@ -34,7 +34,7 @@ cloud-init status --wait
 cd /opt/barbersaas/barber-saas-infra-postgres
 cp env/main.env.example env/main.env
 nano env/main.env      # passwords (openssl rand -hex 24), SMTP, PUBLIC_HOST, FCM, Wompi sandbox keys if any
-./scripts/dev-keys.sh main 525600   # this host's own RSA pair and service tokens, valid one year
+./scripts/dev-keys.sh main 10080    # this host's own RSA pair and service tokens, valid 7 days
 ```
 
 `env/main.env` and `keys/` stay on the VM only (norm 5.9.2). Keep a copy of `env/main.env` in the team's
@@ -87,5 +87,6 @@ changeset or the backup.
 - `cron` runs `./scripts/backup.sh main` every day at 03:00 (cloud-init). Copy `backups/` off the VM
   once a week (`scp -r ubuntu@<ip>:/opt/barbersaas/barber-saas-infra-postgres/backups .`).
 - Never `docker compose down -v`: the volumes are the data.
-- Service tokens last one year: run `./scripts/dev-keys.sh main 525600` again before they expire, then
-  `up -d` again. The RSA pair is kept, so users stay signed in.
+- Service tokens last 7 days (docs#158): `cron` runs `./scripts/dev-keys.sh main 10080` and
+  `./scripts/up.sh main` every Sunday at 03:30 (`cloud-init.yml`). The RSA pair is kept, so users stay
+  signed in. On a VM created before this change, add that line to `/etc/cron.d/` by hand.
