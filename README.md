@@ -36,15 +36,28 @@ composition includes: `up.sh` starts both engines and `migrate.sh` prepares both
 
 ### How to start it
 
-Clone the repositories as siblings with their full names (`barber-saas-infra-postgres`,
-`barber-saas-identity-auth-db`, `barber-saas-identity-auth-api`, …), then:
+**You need:** Git, Docker Desktop (or Docker Engine) with Compose v2.20 or newer, `openssl`, and a
+POSIX shell (on Windows, Git Bash). About 6 GB of free RAM for Docker: every service builds its own
+image the first time, which takes several minutes.
 
 ```bash
+mkdir barbersaas && cd barbersaas
+git clone https://github.com/code-corhuila/barber-saas-infra-postgres.git
 cd barber-saas-infra-postgres
-cp env/dev.env.example env/dev.env      # set PG_ADMIN_PASSWORD and every *_APP_PASSWORD
-./scripts/dev-keys.sh                   # development RS256 keys and one service token per service
-./scripts/up.sh dev                     # network, PostgreSQL, migrations of every -db, services
+./scripts/clone-all.sh develop          # every other repository as a sibling, named barber-saas-<repo>
+cp env/dev.env.example env/dev.env      # set PG_ADMIN_PASSWORD, every *_APP_PASSWORD and the Mongo passwords
+./scripts/dev-keys.sh                   # development RS256 keys and the service tokens (aud, scope; 1 day)
+./scripts/up.sh dev                     # network, PostgreSQL and MongoDB, migrations of every -db, services
 ```
+
+The folder names matter: `compose.yml` includes `../barber-saas-<repo>/…`, and a missing sibling makes
+`up.sh` fail with the path it could not find. Any value of `env/dev.env` left empty that a service
+needs is reported by name before anything starts.
+
+**Check that it runs:** `curl http://localhost:8000/api/v1/barbershops` answers `200` with a JSON
+page (the public catalog, through the gateway), and `docker compose --env-file env/dev.env ps` shows
+every container `healthy`. The mobile app and the web portals are in `barber-saas-front` and point
+to `http://<this machine>:8000`.
 
 `./scripts/dev-super-admin.sh` (development only) creates the `SUPER_ADMIN` of `DEV_SUPER_ADMIN_EMAIL` /
 `DEV_SUPER_ADMIN_PASSWORD`, who signs in to *Plataforma*; running it again changes nothing.
@@ -77,9 +90,11 @@ key or an example with a value.
 `./scripts/up.sh dev` waits for every container to be healthy. Annex J's query (J.10) shows that
 each `<domain>_app` writes only to its own schema.
 
-### What is missing
+### What it runs
 
-Composed today: identity-auth, barbershop, schedule and appointment (each `-db` and `-api`), the
-gateway and the workflow (its service and the `workflow` schema, ADR-009). Loyalty, notifications,
-finance-inventory, platform-admin, the worker and the front are added to
-`include` as they are built. Observability starts with `--profile observability`.
+Everything the platform needs: PostgreSQL and MongoDB; identity-auth, barbershop, schedule,
+appointment, loyalty, finance-inventory, platform-admin (each `-db` and `-api`) and notifications
+(on MongoDB); the api-gateway, the workflow (ADR-009) and the worker (ADR-016). Observability
+(OpenTelemetry collector, Prometheus, Grafana) starts with `--profile observability`. The public
+host adds Caddy with HTTPS on top (`compose.public.yml`, `deploy/azure/README.md`). The front is
+built and run from `barber-saas-front`.
